@@ -34,22 +34,16 @@ public class CrawlerTestMain {
 			System.out.println(sb);
 			
 
-			//Document doc = Jsoup.parse(sb);
+			// 링크 대상 페이지에 접근하기
 			Document nextDoc = Jsoup.connect(s).get();
+			// 상세 내용 추출하기
 			String html = nextDoc.select("div.se-component-content span").text();
 			
-			//Elements elements = doc.select("div.se-component-content span");
 			
-			/*for (Element element : elements) {
-				Iterator<Element> iterElem = element.getElementsByTag("span").iterator();
-				StringBuilder builder = new StringBuilder();
-	            builder.append(iterElem.next().text());
-	            String html1 = builder.toString();
-				System.out.println(html1);
-			}*/
-			System.out.println(html);
-			Files.write(Paths.get(i + ".html"), html.getBytes("UTF-8"));
 			// 블로그 내용 가져오기 테스트
+			System.out.println(html);
+			// ".html"이라는 이름으로 저장하기
+			Files.write(Paths.get(i + ".html"), html.getBytes("UTF-8"));
 			
 			
 			i++;
