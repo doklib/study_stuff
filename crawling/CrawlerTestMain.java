@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -115,6 +116,7 @@ public class CrawlerTestMain {
 
 	public static void main(String[] args) throws Exception{
 		
+		String value="";
 		
 		FileInputStream fis=new FileInputStream("D:\\workspace\\workspace2\\Crawler\\검색어.xlsx");
 		XSSFWorkbook workbook=new XSSFWorkbook(fis);
@@ -134,7 +136,6 @@ public class CrawlerTestMain {
 				for(columnindex=0;columnindex<=cells;columnindex++){
 					//셀값을 읽는다
 					XSSFCell cell=row.getCell(columnindex);
-					String value="";
 					//셀이 빈값일경우를 위한 널체크
 					if(cell==null){
 						continue;
@@ -142,30 +143,35 @@ public class CrawlerTestMain {
 						//타입별로 내용 읽기
 						switch (cell.getCellType()){
 						case XSSFCell.CELL_TYPE_FORMULA:
-							value=cell.getCellFormula();
+							value+=cell.getCellFormula();
 							break;
 						case XSSFCell.CELL_TYPE_NUMERIC:
-							value=cell.getNumericCellValue()+"";
+							value+=cell.getNumericCellValue()+"";
 							break;
 						case XSSFCell.CELL_TYPE_STRING:
-							value=cell.getStringCellValue()+"";
+							value+=cell.getStringCellValue()+"";
 							break;
 						case XSSFCell.CELL_TYPE_BLANK:
 							//value=cell.getBooleanCellValue()+"";
 							break;
 						case XSSFCell.CELL_TYPE_ERROR:
-							value=cell.getErrorCellValue()+"";
+							value+=cell.getErrorCellValue()+"";
 							break;
 						}
 					}
+					value += "+";
 					System.out.println("각 셀 내용 :"+value);
 				}
+				
 			}
 		}	
 	
-	
-		String sc = "테스트+경주";
-		sc1 = sc;
+		String encodeResult = URLEncoder.encode(value, "UTF-8");
+		String sc = encodeResult;
+				//value;
+				//"테스트+경주";
+		//"%EA%B2%BD%EA%B8%B0%EB%8F%84%2B20%EB%8C%80%20%20%20%20%EB%82%A8%EC%9E%90%2B%2B%ED%9C%B4%EC%96%91%2B%EA%B0%80%EC%A1%B1%2B%EB%B4%84%2B%EA%B5%AD%EB%82%B4%EC%97%AC%ED%96%89%2B";
+		sc1 = value;
 		String res = null;
 		for(int i = 0; i <1; i++) {
 			getSearch(sc,i*10+1);
