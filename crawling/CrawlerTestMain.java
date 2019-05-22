@@ -49,7 +49,18 @@ public class CrawlerTestMain {
 			// 링크 대상 페이지에 접근하기
 			Document nextDoc = Jsoup.connect(s).get();
 			// 상세 내용 추출하기
-			String htmlList = nextDoc.select("div.se-component-content span").text();
+			String htmlList = nextDoc.select("div.se-component span").text();
+			if(htmlList.equals("")) {
+				htmlList = nextDoc.select("div.se_component span").text();
+			}
+			/*else if(htmlList.equals("")){
+				htmlList = nextDoc.select("div. span").text();
+		
+			}*/else {
+			
+		
+			}
+			
 			
 			String dateTime = nextDoc.select("span.se_publishDate").text();
 			if(dateTime.contains("시간")) {
@@ -66,13 +77,14 @@ public class CrawlerTestMain {
 			System.out.println(s);
 			
 			String htmlList1 = htmlList.replace(",", "");
-			System.out.println(htmlList1);
+			String htmlList2 = htmlList1.replace("\"", "");
+			System.out.println(htmlList2);
 			
 			
 			Map<String, Object> contextMap = new HashMap<>();
 			contextMap.put("url", s);
 			contextMap.put("date", dateTime);
-			contextMap.put("text", htmlList1);
+			contextMap.put("text", htmlList2);
 			
 			myStringArrays.add(contextMap);
 			
@@ -181,7 +193,7 @@ public class CrawlerTestMain {
 		String url = "https://search.naver.com/search.naver?date_from=&date_option=0&date_to=&dup_remove=1&nso=&post_blogurl=&post_blogurl_without=&query="+sc+"&sm=tab_pge&srchby=all&st=sim&where=post&start=1";
 		int totalNum = Integer.parseInt(c.blogTotal(url));
 		
-		for(int i = 0; i <totalNum/100; i++) {
+		for(int i = 0; i <totalNum/10; i++) {
 //		for(int i = 0; i <5; i++) {	
 			getSearch(sc,i*10+1);
 			
