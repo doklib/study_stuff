@@ -21,9 +21,12 @@ import org.jsoup.nodes.Document;
 
 public class CrawlerTestMain {
 	
+	
 	static String sc1 = "";
+	static Date time1 = new Date();
+	static ArrayList<Object> searchMapArray = new ArrayList<Object>();
 
-	public static void getSearch(String sc, int pg) throws Exception {
+	public static void getSearch(String sc, int pg, int index) throws Exception {
 		// TODO Auto-generated method stub
 
 		CrawlerTest c = new CrawlerTest();
@@ -32,15 +35,21 @@ public class CrawlerTestMain {
 		System.out.println(url);
 		System.out.println(pg+"번호");
 		
-		List<String> list = c.blog(url);
+		List<Object> multiList = c.blog(url);
+		
+	
 		//int totalNum = Integer.parseInt(c.blogTotal(url));
 		
 		ArrayList<Object> myStringArrays = new ArrayList<Object>();
 		Map<String, Object> multiMap = new HashMap<>();
 
 		int i = 0;
-		for(String s : list) {
+		for(Object ss : multiList) {
+			String s = (String) ((HashMap)ss).get("url");
 			String sb = c.getHtml(s);	
+			
+			String titleFin =(String) ((HashMap)ss).get("title");
+			titleFin = titleFin.replace(",", "");
 			// 블로그 내용 
 			System.out.println("블로그 목록 URL : " + s);
 			System.out.println(sb);
@@ -56,28 +65,39 @@ public class CrawlerTestMain {
 			/*else if(htmlList.equals("")){
 				htmlList = nextDoc.select("div. span").text();
 		
-			}*/else {
+			}*/
 			
-		
-			}
-			
+			if(!htmlList.equals("")&&htmlList.length()<30000) {
+				
 			
 			String dateTime = nextDoc.select("span.se_publishDate").text();
-			if(dateTime.contains("시간")) {
-				SimpleDateFormat format1 = new SimpleDateFormat ( "yyyy. MM. dd. HH:mm");		
+			
+			SimpleDateFormat orginFormat = new SimpleDateFormat ( "yyyy. M. dd. HH:mm");
+			SimpleDateFormat format = new SimpleDateFormat ( "yyyyMMdd");	
+		
+			if(dateTime.contains("전")) {	
 				Date time = new Date();
-				dateTime = format1.format(time);
+				dateTime = orginFormat.format(time);
 			}
-			else {
-				
-			}
+			
+			
+			Date orginDate = orginFormat.parse(dateTime);
+			dateTime = format.format(orginDate);
+			//System.out.println(newDate);
 			System.out.println(dateTime);	
 			
 			// 블로그 내용 가져오기 테스트
 			System.out.println(s);
 			
-			String htmlList1 = htmlList.replace(",", "");
-			String htmlList2 = htmlList1.replace("\"", "");
+			
+			
+			/*if(htmlList.length()>10000) {
+				int leng = htmlList.length();
+			} else {
+				
+			}*/
+			
+			String htmlList2 = htmlList.replace(",", "");
 			System.out.println(htmlList2);
 			
 			
@@ -85,9 +105,11 @@ public class CrawlerTestMain {
 			contextMap.put("url", s);
 			contextMap.put("date", dateTime);
 			contextMap.put("text", htmlList2);
+			contextMap.put("title", titleFin);
 			
 			myStringArrays.add(contextMap);
 			
+			}
 			i++;
 		}
 		 
@@ -95,27 +117,35 @@ public class CrawlerTestMain {
 		
 
 		// sc 이름으로 저장하기
-		createCSV(myStringArrays);
+		createCSV(myStringArrays, index);
 
 		
 	}
 	
-	public static int createCSV(ArrayList<Object> myStringArrays){
+	public static int createCSV(ArrayList<Object> myStringArrays, int index){
 	       
 		   int resultCount =0; 
 		    
 		   try{
+			   
+			   HashMap<String,Object> searched = (HashMap<String, Object>) searchMapArray.get(index);
+			   String AddrOut =  (String) searched.get("Addr");
+			   String AgeOut = (String) searched.get("Age");
+    		   String SexOut = (String) searched.get("Sex");
+    		   String PurposeOut = (String) searched.get("Purpose");
+    		   String CompanionOut = (String) searched.get("Companion");
+    		   String SeasonOut = (String) searched.get("Season");
+			   
+			   
+		       BufferedWriter fw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("D:\\workspace\\workspace2\\Crawler\\"+"결과"+".csv",true),"MS949"));
 		    
-		       BufferedWriter fw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("D:\\workspace\\workspace2\\Crawler\\"+sc1+".csv",true),"MS949"));
-		    
-		       for(Object dom : myStringArrays) {
-		    	   	    	   
-		    	   
-		    	   String a = ((HashMap)dom).get("url")+","+((HashMap)dom).get("date")+",\""+((HashMap)dom).get("text")+"\"";
-		    	   fw.write(a);
-		    	   fw.newLine();
-		    	   resultCount++;
-		       }
+		       for(Object dom : myStringArrays) {	
+	    		   String a = AddrOut+","+AgeOut+","+SexOut+","+PurposeOut+","+CompanionOut+","+SeasonOut+","+
+	    		   ((HashMap)dom).get("url")+","+((HashMap)dom).get("title")+","+((HashMap)dom).get("date")+","+((HashMap)dom).get("text");
+	    		   fw.write(a);
+	    		   fw.newLine();
+	    		   resultCount++;  
+			       }
 		       
 		       fw.flush();
 		       fw.close();
@@ -135,8 +165,9 @@ public class CrawlerTestMain {
 		
 		FileInputStream fis=new FileInputStream("D:\\workspace\\workspace2\\Crawler\\검색어.xlsx");
 		XSSFWorkbook workbook=new XSSFWorkbook(fis);
+         
+         
 		int rowindex=0;
-		int columnindex=0;
 		//시트 수 (첫번째에만 존재하므로 0을 준다)
 		//만약 각 시트를 읽기위해서는 FOR문을 한번더 돌려준다
 		XSSFSheet sheet=workbook.getSheetAt(0);
@@ -145,58 +176,43 @@ public class CrawlerTestMain {
 		for(rowindex=1;rowindex<rows;rowindex++){
 			//행을읽는다
 			XSSFRow row=sheet.getRow(rowindex);
-			if(row !=null){
-				//셀의 수
-				int cells=row.getPhysicalNumberOfCells();
-				for(columnindex=0;columnindex<=cells;columnindex++){
-					//셀값을 읽는다
-					XSSFCell cell=row.getCell(columnindex);
-					//셀이 빈값일경우를 위한 널체크
-					if(cell==null){
-						continue;
-					}else{
-						//타입별로 내용 읽기
-						switch (cell.getCellType()){
-						case XSSFCell.CELL_TYPE_FORMULA:
-							value+=cell.getCellFormula();
-							break;
-						case XSSFCell.CELL_TYPE_NUMERIC:
-							value+=cell.getNumericCellValue()+"";
-							break;
-						case XSSFCell.CELL_TYPE_STRING:
-							value+=cell.getStringCellValue()+"";
-							break;
-						case XSSFCell.CELL_TYPE_BLANK:
-							//value=cell.getBooleanCellValue()+"";
-							break;
-						case XSSFCell.CELL_TYPE_ERROR:
-							value+=cell.getErrorCellValue()+"";
-							break;
-						}
-					}
-					value += "+";
-					System.out.println("각 셀 내용 :"+value);
-				}
-				
-			}
-		}	
-	
-		String encodeResult = URLEncoder.encode(value, "UTF-8");
-		String sc = encodeResult;
-				//value;
-				//"테스트+경주";
-		//"%EA%B2%BD%EA%B8%B0%EB%8F%84%2B20%EB%8C%80%20%20%20%20%EB%82%A8%EC%9E%90%2B%2B%ED%9C%B4%EC%96%91%2B%EA%B0%80%EC%A1%B1%2B%EB%B4%84%2B%EA%B5%AD%EB%82%B4%EC%97%AC%ED%96%89%2B";
-		sc1 = value;
-		
-		
-		CrawlerTest c = new CrawlerTest();
-		String url = "https://search.naver.com/search.naver?date_from=&date_option=0&date_to=&dup_remove=1&nso=&post_blogurl=&post_blogurl_without=&query="+sc+"&sm=tab_pge&srchby=all&st=sim&where=post&start=1";
-		int totalNum = Integer.parseInt(c.blogTotal(url));
-		
-		for(int i = 0; i <totalNum/10; i++) {
-//		for(int i = 0; i <5; i++) {	
-			getSearch(sc,i*10+1);
 			
+			Map<String, Object> searchMap = new HashMap<>();
+			searchMap.put("Addr", String.valueOf(row.getCell(0)));
+			searchMap.put("Age", String.valueOf(row.getCell(1)));
+			searchMap.put("Sex", String.valueOf(row.getCell(2)));
+			searchMap.put("Purpose", String.valueOf(row.getCell(3)));
+			searchMap.put("Companion", String.valueOf(row.getCell(4)));
+			searchMap.put("Season", String.valueOf(row.getCell(5)));
+			searchMap.put("rownum", rowindex);
+			searchMapArray.add(searchMap);
+
+		System.out.println(searchMapArray);
+		}	
+		
+		for(Object arr : searchMapArray) {	
+	 		   value = ((HashMap)arr).get("Addr")+"+"+((HashMap)arr).get("Age")+"+"+((HashMap)arr).get("Sex")+"+"+((HashMap)arr).get("Purpose")+"+"+((HashMap)arr).get("Companion")+"+"+((HashMap)arr).get("Season");
+	 		   int row = (int) ((HashMap)arr).get("rownum");
+	 		  int index = searchMapArray.indexOf(arr);
+
+		
+			String encodeResult = URLEncoder.encode(value, "UTF-8");
+			String sc = encodeResult;
+					//value;
+					//"테스트+경주";
+			//"%EA%B2%BD%EA%B8%B0%EB%8F%84%2B20%EB%8C%80%20%20%20%20%EB%82%A8%EC%9E%90%2B%2B%ED%9C%B4%EC%96%91%2B%EA%B0%80%EC%A1%B1%2B%EB%B4%84%2B%EA%B5%AD%EB%82%B4%EC%97%AC%ED%96%89%2B";
+			sc1 = value;
+			
+			
+			CrawlerTest c = new CrawlerTest();
+			String url = "https://search.naver.com/search.naver?date_from=&date_option=0&date_to=&dup_remove=1&nso=&post_blogurl=&post_blogurl_without=&query="+sc+"&sm=tab_pge&srchby=all&st=sim&where=post&start=1";
+			int totalNum = Integer.parseInt(c.blogTotal(url));
+			
+			for(int i = 0; i <totalNum/1000; i++) {
+	//		for(int i = 0; i <5; i++) {	
+				getSearch(sc,i*10+1,index);
+			
+			}
 		}
 			
 	}
