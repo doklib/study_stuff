@@ -35,21 +35,19 @@ public class CrawlerTestMain {
 		System.out.println(url);
 		System.out.println(pg+"번호");
 		
-		List<Object> multiList = c.blog(url);
-		
+		List<Object> urlList = c.blog(url);
 	
-		//int totalNum = Integer.parseInt(c.blogTotal(url));
+		
 		
 		ArrayList<Object> myStringArrays = new ArrayList<Object>();
 		Map<String, Object> multiMap = new HashMap<>();
 
 		int i = 0;
-		for(Object ss : multiList) {
-			String s = (String) ((HashMap)ss).get("url");
+		for(Object ss : urlList) {
+			String s = (String) ((HashMap<String,String>) ss).get("url");
 			String sb = c.getHtml(s);	
 			
-			String titleFin =(String) ((HashMap)ss).get("title");
-			titleFin = titleFin.replace(",", "");
+			
 			// 블로그 내용 
 			System.out.println("블로그 목록 URL : " + s);
 			System.out.println(sb);
@@ -70,6 +68,13 @@ public class CrawlerTestMain {
 			if(!htmlList.equals("")&&htmlList.length()<30000) {
 				
 			
+			String titleFin	= (String) ((HashMap<String,String>) ss).get("title");
+			if(titleFin.equals("")) {
+				titleFin = nextDoc.select("div.se_textView").text();
+			}
+			
+			titleFin = titleFin.replace(",", "");
+			
 			String dateTime = nextDoc.select("span.se_publishDate").text();
 			
 			SimpleDateFormat orginFormat = new SimpleDateFormat ( "yyyy. M. dd. HH:mm");
@@ -79,23 +84,15 @@ public class CrawlerTestMain {
 				Date time = new Date();
 				dateTime = orginFormat.format(time);
 			}
-			
-			
+			if(!dateTime.equals("")) {
 			Date orginDate = orginFormat.parse(dateTime);
 			dateTime = format.format(orginDate);
-			//System.out.println(newDate);
+			}
 			System.out.println(dateTime);	
 			
 			// 블로그 내용 가져오기 테스트
 			System.out.println(s);
 			
-			
-			
-			/*if(htmlList.length()>10000) {
-				int leng = htmlList.length();
-			} else {
-				
-			}*/
 			
 			String htmlList2 = htmlList.replace(",", "");
 			System.out.println(htmlList2);
@@ -129,18 +126,19 @@ public class CrawlerTestMain {
 		   try{
 			   
 			   HashMap<String,Object> searched = (HashMap<String, Object>) searchMapArray.get(index);
-			   String AddrOut =  (String) searched.get("Addr");
-			   String AgeOut = (String) searched.get("Age");
-    		   String SexOut = (String) searched.get("Sex");
-    		   String PurposeOut = (String) searched.get("Purpose");
-    		   String CompanionOut = (String) searched.get("Companion");
-    		   String SeasonOut = (String) searched.get("Season");
+			   String addrOut =  (String) searched.get("Addr");
+			   String ageOut = (String) searched.get("Age");
+    		   String sexOut = (String) searched.get("Sex");
+    		   String purposeOut = (String) searched.get("Purpose");
+    		   String companionOut = (String) searched.get("Companion");
+    		   String seasonOut = (String) searched.get("Season");
+    		   String travelOut = (String) searched.get("Travel");
 			   
 			   
 		       BufferedWriter fw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("D:\\workspace\\workspace2\\Crawler\\"+"결과"+".csv",true),"MS949"));
 		    
 		       for(Object dom : myStringArrays) {	
-	    		   String a = AddrOut+","+AgeOut+","+SexOut+","+PurposeOut+","+CompanionOut+","+SeasonOut+","+
+	    		   String a = addrOut+","+ageOut+","+sexOut+","+purposeOut+","+companionOut+","+seasonOut+","+travelOut+","+
 	    		   ((HashMap)dom).get("url")+","+((HashMap)dom).get("title")+","+((HashMap)dom).get("date")+","+((HashMap)dom).get("text");
 	    		   fw.write(a);
 	    		   fw.newLine();
@@ -184,6 +182,7 @@ public class CrawlerTestMain {
 			searchMap.put("Purpose", String.valueOf(row.getCell(3)));
 			searchMap.put("Companion", String.valueOf(row.getCell(4)));
 			searchMap.put("Season", String.valueOf(row.getCell(5)));
+			searchMap.put("Travel", String.valueOf(row.getCell(6)));
 			searchMap.put("rownum", rowindex);
 			searchMapArray.add(searchMap);
 
@@ -191,7 +190,7 @@ public class CrawlerTestMain {
 		}	
 		
 		for(Object arr : searchMapArray) {	
-	 		   value = ((HashMap)arr).get("Addr")+"+"+((HashMap)arr).get("Age")+"+"+((HashMap)arr).get("Sex")+"+"+((HashMap)arr).get("Purpose")+"+"+((HashMap)arr).get("Companion")+"+"+((HashMap)arr).get("Season");
+	 		   value = ((HashMap)arr).get("Addr")+"+"+((HashMap)arr).get("Age")+"+"+((HashMap)arr).get("Sex")+"+"+((HashMap)arr).get("Purpose")+"+"+((HashMap)arr).get("Companion")+"+"+((HashMap)arr).get("Season")+"+"+((HashMap)arr).get("Travel");
 	 		   int row = (int) ((HashMap)arr).get("rownum");
 	 		  int index = searchMapArray.indexOf(arr);
 
@@ -207,7 +206,7 @@ public class CrawlerTestMain {
 			CrawlerTest c = new CrawlerTest();
 			String url = "https://search.naver.com/search.naver?date_from=&date_option=0&date_to=&dup_remove=1&nso=&post_blogurl=&post_blogurl_without=&query="+sc+"&sm=tab_pge&srchby=all&st=sim&where=post&start=1";
 			int totalNum = Integer.parseInt(c.blogTotal(url));
-			
+			System.out.println(totalNum);
 			for(int i = 0; i <totalNum/1000; i++) {
 	//		for(int i = 0; i <5; i++) {	
 				getSearch(sc,i*10+1,index);
