@@ -2,7 +2,9 @@ package crawler;
 
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -119,9 +121,9 @@ public class CrawlerTestMain {
 		
 	}
 	
-	public static int createCSV(ArrayList<Object> myStringArrays, int index){
+	public static void createCSV(ArrayList<Object> myStringArrays, int index){
 	       
-		   int resultCount =0; 
+		   
 		    
 		   try{
 			   
@@ -142,7 +144,7 @@ public class CrawlerTestMain {
 	    		   ((HashMap)dom).get("url")+","+((HashMap)dom).get("title")+","+((HashMap)dom).get("date")+","+((HashMap)dom).get("text");
 	    		   fw.write(a);
 	    		   fw.newLine();
-	    		   resultCount++;  
+	    		    
 			       }
 		       
 		       fw.flush();
@@ -151,13 +153,74 @@ public class CrawlerTestMain {
 		   }catch (Exception e) {
 		     e.printStackTrace();
 		   }
-		       return resultCount;
-		   }
+	}
+		       
 	
 
 
 
 	public static void main(String[] args) throws Exception{
+		
+			String value="";
+			int index=0;
+		
+			readExcel();
+			
+			for(Object arr : searchMapArray) {	
+		 		   value = ((HashMap)arr).get("Addr")+"+"+((HashMap)arr).get("Age")+"+"+((HashMap)arr).get("Sex")+"+"+((HashMap)arr).get("Purpose")+"+"+((HashMap)arr).get("Companion")+"+"+((HashMap)arr).get("Season")+"+"+((HashMap)arr).get("Travel");
+		 		  // int row = (int) ((HashMap)arr).get("rownum");
+		 		  index = searchMapArray.indexOf(arr);
+			   }
+
+		
+			String encodeResult = URLEncoder.encode(value, "UTF-8");
+			String sc = encodeResult;
+					//value;
+					//"테스트+경주";
+			//"%EA%B2%BD%EA%B8%B0%EB%8F%84%2B20%EB%8C%80%20%20%20%20%EB%82%A8%EC%9E%90%2B%2B%ED%9C%B4%EC%96%91%2B%EA%B0%80%EC%A1%B1%2B%EB%B4%84%2B%EA%B5%AD%EB%82%B4%EC%97%AC%ED%96%89%2B";
+			sc1 = value;
+			
+			
+			CrawlerTest c = new CrawlerTest();
+			String url = "https://search.naver.com/search.naver?date_from=&date_option=0&date_to=&dup_remove=1&nso=&post_blogurl=&post_blogurl_without=&query="+sc+"&sm=tab_pge&srchby=all&st=sim&where=post&start=1";
+			int totalNum = Integer.parseInt(c.blogTotal(url));
+			System.out.println(totalNum);
+			for(int i = 0; i <totalNum/10; i++) {
+	//		for(int i = 0; i <5; i++) {	
+				getSearch(sc,i*10+1,index);
+			
+			}
+		}
+	
+	public static void searchCombin() {
+		
+		String [] addrs = {"서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별시", "경기도", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "제주도"};
+		String [] ages = {"10대", "20대", "30대", "40대", "50대", "60대", "70대", "80대"};
+		String [] sexs = {"남자", "여자"};
+		String [] purposes = {"자연", "휴양", "역사", "문화", "축제", "레포츠", "맛집", "체험", "캠핑"};
+		String [] companions = {"부모님", "자녀", "연인", "친구", "동료"};
+		String [] seasons = {"봄", "여름", "가을", "겨울"};
+		
+		
+		
+		
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+			
+	
+	public static void readExcel() throws IOException{
+	    
 		
 		String value="";
 		
@@ -189,31 +252,8 @@ public class CrawlerTestMain {
 		System.out.println(searchMapArray);
 		}	
 		
-		for(Object arr : searchMapArray) {	
-	 		   value = ((HashMap)arr).get("Addr")+"+"+((HashMap)arr).get("Age")+"+"+((HashMap)arr).get("Sex")+"+"+((HashMap)arr).get("Purpose")+"+"+((HashMap)arr).get("Companion")+"+"+((HashMap)arr).get("Season")+"+"+((HashMap)arr).get("Travel");
-	 		   int row = (int) ((HashMap)arr).get("rownum");
-	 		  int index = searchMapArray.indexOf(arr);
-
 		
-			String encodeResult = URLEncoder.encode(value, "UTF-8");
-			String sc = encodeResult;
-					//value;
-					//"테스트+경주";
-			//"%EA%B2%BD%EA%B8%B0%EB%8F%84%2B20%EB%8C%80%20%20%20%20%EB%82%A8%EC%9E%90%2B%2B%ED%9C%B4%EC%96%91%2B%EA%B0%80%EC%A1%B1%2B%EB%B4%84%2B%EA%B5%AD%EB%82%B4%EC%97%AC%ED%96%89%2B";
-			sc1 = value;
-			
-			
-			CrawlerTest c = new CrawlerTest();
-			String url = "https://search.naver.com/search.naver?date_from=&date_option=0&date_to=&dup_remove=1&nso=&post_blogurl=&post_blogurl_without=&query="+sc+"&sm=tab_pge&srchby=all&st=sim&where=post&start=1";
-			int totalNum = Integer.parseInt(c.blogTotal(url));
-			System.out.println(totalNum);
-			for(int i = 0; i <totalNum/1000; i++) {
-	//		for(int i = 0; i <5; i++) {	
-				getSearch(sc,i*10+1,index);
-			
-			}
-		}
-			
-	}
-		
+	
+	}	
 }
+
