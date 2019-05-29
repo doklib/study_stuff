@@ -27,6 +27,7 @@ public class CrawlerTestMain {
 	static String sc1 = "";
 	static Date time1 = new Date();
 	static ArrayList<Object> searchMapArray = new ArrayList<Object>();
+	static ArrayList<Object> combineArray = new ArrayList<Object>();
 
 	public static void getSearch(String sc, int pg, int index) throws Exception {
 		// TODO Auto-generated method stub
@@ -34,8 +35,8 @@ public class CrawlerTestMain {
 		CrawlerTest c = new CrawlerTest();
 		
 		String url = "https://search.naver.com/search.naver?date_from=&date_option=0&date_to=&dup_remove=1&nso=&post_blogurl=&post_blogurl_without=&query="+sc+"&sm=tab_pge&srchby=all&st=sim&where=post&start="+pg;
-		System.out.println(url);
-		System.out.println(pg+"번호");
+		//System.out.println(url);
+		//System.out.println(pg+"번호");
 		
 		List<Object> urlList = c.blog(url);
 	
@@ -51,8 +52,8 @@ public class CrawlerTestMain {
 			
 			
 			// 블로그 내용 
-			System.out.println("블로그 목록 URL : " + s);
-			System.out.println(sb);
+			//System.out.println("블로그 목록 URL : " + s);
+			//System.out.println(sb);
 			
 
 			// 링크 대상 페이지에 접근하기
@@ -90,14 +91,14 @@ public class CrawlerTestMain {
 			Date orginDate = orginFormat.parse(dateTime);
 			dateTime = format.format(orginDate);
 			}
-			System.out.println(dateTime);	
+			//System.out.println(dateTime);	
 			
 			// 블로그 내용 가져오기 테스트
-			System.out.println(s);
+			//System.out.println(s);
 			
 			
 			String htmlList2 = htmlList.replace(",", "");
-			System.out.println(htmlList2);
+			//System.out.println(htmlList2);
 			
 			
 			Map<String, Object> contextMap = new HashMap<>();
@@ -127,21 +128,23 @@ public class CrawlerTestMain {
 		    
 		   try{
 			   
-			   HashMap<String,Object> searched = (HashMap<String, Object>) searchMapArray.get(index);
-			   String addrOut =  (String) searched.get("Addr");
-			   String ageOut = (String) searched.get("Age");
-    		   String sexOut = (String) searched.get("Sex");
-    		   String purposeOut = (String) searched.get("Purpose");
-    		   String companionOut = (String) searched.get("Companion");
-    		   String seasonOut = (String) searched.get("Season");
-    		   String travelOut = (String) searched.get("Travel");
+			   HashMap<String,Object> searched = (HashMap<String, Object>) combineArray.get(index);
+			   String addrOut =  (String) searched.get("addrs");
+			   String ageOut = (String) searched.get("ages");
+    		   String sexOut = (String) searched.get("sexs");
+    		   String purposeOut = (String) searched.get("purposes");
+    		   String companionOut = (String) searched.get("companions");
+    		   String seasonOut = (String) searched.get("seasons");
+    		   //String travelOut = (String) searched.get("Travel");
+    		  
 			   
 			   
 		       BufferedWriter fw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("D:\\workspace\\workspace2\\Crawler\\"+"결과"+".csv",true),"MS949"));
 		    
 		       for(Object dom : myStringArrays) {	
-	    		   String a = addrOut+","+ageOut+","+sexOut+","+purposeOut+","+companionOut+","+seasonOut+","+travelOut+","+
-	    		   ((HashMap)dom).get("url")+","+((HashMap)dom).get("title")+","+((HashMap)dom).get("date")+","+((HashMap)dom).get("text");
+	    		   String a = addrOut+","+ageOut+","+sexOut+","+purposeOut+","+companionOut+","+seasonOut
+//	    				   +""+ ","+travelOut
+	    				   +","+((HashMap)dom).get("url")+","+((HashMap)dom).get("title")+","+((HashMap)dom).get("date")+","+((HashMap)dom).get("text");
 	    		   fw.write(a);
 	    		   fw.newLine();
 	    		    
@@ -161,62 +164,72 @@ public class CrawlerTestMain {
 
 	public static void main(String[] args) throws Exception{
 		
-			String value="";
+		String value = null;
 			int index=0;
+			ArrayList<Object> combineArray = null;
 		
-			readExcel();
+			//readExcel();
+			combineArray = searchCombin();
 			
-			for(Object arr : searchMapArray) {	
-		 		   value = ((HashMap)arr).get("Addr")+"+"+((HashMap)arr).get("Age")+"+"+((HashMap)arr).get("Sex")+"+"+((HashMap)arr).get("Purpose")+"+"+((HashMap)arr).get("Companion")+"+"+((HashMap)arr).get("Season")+"+"+((HashMap)arr).get("Travel");
-		 		  // int row = (int) ((HashMap)arr).get("rownum");
-		 		  index = searchMapArray.indexOf(arr);
-			   }
-
-		
+			for(Object arr2 : combineArray) {	
+				index = combineArray.indexOf(arr2);
+		 		value = ((HashMap)arr2).get("addrs")+"+"+((HashMap)arr2).get("ages")+"+"+((HashMap)arr2).get("sexs")
+		 				   +"+"+((HashMap)arr2).get("purposes")+"+"+((HashMap)arr2).get("companions")+"+"+((HashMap)arr2).get("seasons");
+		 		  
+			
 			String encodeResult = URLEncoder.encode(value, "UTF-8");
 			String sc = encodeResult;
-					//value;
-					//"테스트+경주";
-			//"%EA%B2%BD%EA%B8%B0%EB%8F%84%2B20%EB%8C%80%20%20%20%20%EB%82%A8%EC%9E%90%2B%2B%ED%9C%B4%EC%96%91%2B%EA%B0%80%EC%A1%B1%2B%EB%B4%84%2B%EA%B5%AD%EB%82%B4%EC%97%AC%ED%96%89%2B";
 			sc1 = value;
-			
 			
 			CrawlerTest c = new CrawlerTest();
 			String url = "https://search.naver.com/search.naver?date_from=&date_option=0&date_to=&dup_remove=1&nso=&post_blogurl=&post_blogurl_without=&query="+sc+"&sm=tab_pge&srchby=all&st=sim&where=post&start=1";
-			int totalNum = Integer.parseInt(c.blogTotal(url));
-			System.out.println(totalNum);
-			for(int i = 0; i <totalNum/10; i++) {
-	//		for(int i = 0; i <5; i++) {	
-				getSearch(sc,i*10+1,index);
-			
+	//		int totalNum = Integer.parseInt(c.blogTotal(url));
+			System.out.println(index);
+	//			for(int i = 0; i <totalNum/1000; i++) {
+				for(int i = 0; i <5; i++) {	
+					getSearch(sc,i*10+1,index);
+				
+				}
 			}
 		}
 	
-	public static void searchCombin() {
+	public static ArrayList<Object> searchCombin() {
 		
-		String [] addrs = {"서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별시", "경기도", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "제주도"};
-		String [] ages = {"10대", "20대", "30대", "40대", "50대", "60대", "70대", "80대"};
+		String [] addrs = {"서울특별시", "부산광역시"
+				/*, "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별시", "경기도", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "제주도"*/};
+		String [] ages = {"10대", "20대"/*, "30대", "40대", "50대", "60대", "70대", "80대"*/};
 		String [] sexs = {"남자", "여자"};
-		String [] purposes = {"자연", "휴양", "역사", "문화", "축제", "레포츠", "맛집", "체험", "캠핑"};
-		String [] companions = {"부모님", "자녀", "연인", "친구", "동료"};
-		String [] seasons = {"봄", "여름", "가을", "겨울"};
+		String [] purposes = {"자연", "휴양"/*, "역사", "문화", "축제", "레포츠", "맛집", "체험", "캠핑"*/};
+		String [] companions = {"부모님", "자녀"/*, "연인", "친구", "동료"*/};
+		String [] seasons = {"봄", "여름"/*, "가을", "겨울"*/};
 		
+	//	ArrayList<Object> combineArray = new ArrayList<Object>();
 		
+			for(int a = 0; a < addrs.length; a++) {
+				for(int b = 0; b < ages.length; b++) {
+					for(int c = 0; c < sexs.length; c++) {
+						for(int d = 0; d < purposes.length; d++) {
+							for(int e = 0; e < companions.length; e++) {
+								for(int f = 0; f < seasons.length; f++) {
+									Map<String, String> combine = new HashMap<>();
+									combine.put("seasons", seasons[f]);
+									combine.put("companions", companions[e]);
+									combine.put("purposes", purposes[d]);
+									combine.put("sexs", sexs[c]);
+									combine.put("ages", ages[b]);
+									combine.put("addrs", addrs[a]);
+									combineArray.add(combine);
+									//System.out.println(combineArray);
+								}
+							}
+						}
+					}
+				}
 		
-		
-		
+			}
+			//System.out.println(combineArray);
+			return combineArray;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 			
 	
 	public static void readExcel() throws IOException{
@@ -249,7 +262,7 @@ public class CrawlerTestMain {
 			searchMap.put("rownum", rowindex);
 			searchMapArray.add(searchMap);
 
-		System.out.println(searchMapArray);
+		//System.out.println(searchMapArray);
 		}	
 		
 		
