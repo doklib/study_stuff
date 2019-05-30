@@ -98,6 +98,9 @@ public class CrawlerTestMain {
 			
 			
 			String htmlList2 = htmlList.replace(",", "");
+			htmlList2 = htmlList2.replace("\"", "");
+			//[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"]
+
 			//System.out.println(htmlList2);
 			
 			
@@ -144,7 +147,7 @@ public class CrawlerTestMain {
 		       for(Object dom : myStringArrays) {	
 	    		   String a = addrOut+","+ageOut+","+sexOut+","+purposeOut+","+companionOut+","+seasonOut
 //	    				   +""+ ","+travelOut
-	    				   +","+((HashMap)dom).get("url")+","+((HashMap)dom).get("title")+","+((HashMap)dom).get("date")+","+((HashMap)dom).get("text");
+	    				   +","+((HashMap)dom).get("url")+","+((HashMap)dom).get("title")+","+((HashMap)dom).get("date")+",\""+((HashMap)dom).get("text")+"\"";
 	    		   fw.write(a);
 	    		   fw.newLine();
 	    		    
@@ -181,12 +184,12 @@ public class CrawlerTestMain {
 			String sc = encodeResult;
 			sc1 = value;
 			
-			CrawlerTest c = new CrawlerTest();
-			String url = "https://search.naver.com/search.naver?date_from=&date_option=0&date_to=&dup_remove=1&nso=&post_blogurl=&post_blogurl_without=&query="+sc+"&sm=tab_pge&srchby=all&st=sim&where=post&start=1";
+	//		CrawlerTest c = new CrawlerTest();
+	//		String url = "https://search.naver.com/search.naver?date_from=&date_option=0&date_to=&dup_remove=1&nso=&post_blogurl=&post_blogurl_without=&query="+sc+"&sm=tab_pge&srchby=all&st=sim&where=post&start=1";
 	//		int totalNum = Integer.parseInt(c.blogTotal(url));
 			System.out.println(index);
 	//			for(int i = 0; i <totalNum/1000; i++) {
-				for(int i = 0; i <5; i++) {	
+				for(int i = 0; i <2; i++) {	
 					getSearch(sc,i*10+1,index);
 				
 				}
@@ -196,12 +199,12 @@ public class CrawlerTestMain {
 	public static ArrayList<Object> searchCombin() {
 		
 		String [] addrs = {"서울특별시", "부산광역시"
-				/*, "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별시", "경기도", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "제주도"*/};
-		String [] ages = {"10대", "20대"/*, "30대", "40대", "50대", "60대", "70대", "80대"*/};
+				, "경기도", "강원도", "충청도", "전라도", "경상도", "제주도"};
+		String [] ages = {"10대", "20대", "30대+40대", "50대+60대+70대+80대"};
 		String [] sexs = {"남자", "여자"};
-		String [] purposes = {"자연", "휴양"/*, "역사", "문화", "축제", "레포츠", "맛집", "체험", "캠핑"*/};
-		String [] companions = {"부모님", "자녀"/*, "연인", "친구", "동료"*/};
-		String [] seasons = {"봄", "여름"/*, "가을", "겨울"*/};
+		String [] purposes = {"자연", "휴양", "역사", "문화", "축제", "레포츠", "맛집", "캠핑"};
+		String [] companions = {"부모님", "자녀", "연인", "친구"};
+		String [] seasons = {"봄", "여름", "가을", "겨울"};
 		
 	//	ArrayList<Object> combineArray = new ArrayList<Object>();
 		
