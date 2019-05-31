@@ -229,7 +229,7 @@ public class CrawlerTestMain {
 		
 		for(int i=0;i<addrs.length;i++)
 		{
-			randomAddr[i] = r.nextInt(addrs.length)+1;
+			randomAddr[i] = r.nextInt(addrs.length);
 			for(int j=0; j<i; j++)
 			{
 				if(randomAddr[i]==randomAddr[j])
