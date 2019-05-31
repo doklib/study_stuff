@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -48,7 +49,7 @@ public class CrawlerTestMain {
 		int i = 0;
 		for(Object ss : urlList) {
 			String s = (String) ((HashMap<String,String>) ss).get("url");
-			String sb = c.getHtml(s);	
+			//String sb = c.getHtml(s);	
 			
 			
 			// 블로그 내용 
@@ -57,7 +58,10 @@ public class CrawlerTestMain {
 			
 
 			// 링크 대상 페이지에 접근하기
-			Document nextDoc = Jsoup.connect(s).get();
+			Document nextDoc;
+			try {
+				nextDoc = Jsoup.connect(s).get();
+			
 			// 상세 내용 추출하기
 			String htmlList = nextDoc.select("div.se-component span").text();
 			if(htmlList.equals("")) {
@@ -69,7 +73,7 @@ public class CrawlerTestMain {
 			}*/
 			
 			if(!htmlList.equals("")&&htmlList.length()<30000) {
-				
+			//debug gg	
 			
 			String titleFin	= (String) ((HashMap<String,String>) ss).get("title");
 			if(titleFin.equals("")) {
@@ -112,6 +116,11 @@ public class CrawlerTestMain {
 			
 			myStringArrays.add(contextMap);
 			
+			}
+			
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			i++;
 		}
@@ -189,7 +198,7 @@ public class CrawlerTestMain {
 	//		int totalNum = Integer.parseInt(c.blogTotal(url));
 			System.out.println(index);
 	//			for(int i = 0; i <totalNum/1000; i++) {
-				for(int i = 0; i <2; i++) {	
+				for(int i = 0; i <4; i++) {	
 					getSearch(sc,i*10+1,index);
 				
 				}
@@ -198,8 +207,15 @@ public class CrawlerTestMain {
 	
 	public static ArrayList<Object> searchCombin() {
 		
-		String [] addrs = {"서울특별시", "부산광역시"
+		/*String [] addrs = {"서울특별시", "부산광역시"
 				, "경기도", "강원도", "충청도", "전라도", "경상도", "제주도"};
+		String [] ages = {"10대", "20대", "30대+40대", "50대+60대+70대+80대"};
+		String [] sexs = {"남자", "여자"};
+		String [] purposes = {"자연", "휴양", "역사", "문화", "축제", "레포츠", "맛집", "캠핑"};
+		String [] companions = {"부모님", "자녀", "연인", "친구"};
+		String [] seasons = {"봄", "여름", "가을", "겨울"};*/
+		
+		String [] addrs = {"강원도", "충청도", "전라도", "경상도", "제주도"};
 		String [] ages = {"10대", "20대", "30대+40대", "50대+60대+70대+80대"};
 		String [] sexs = {"남자", "여자"};
 		String [] purposes = {"자연", "휴양", "역사", "문화", "축제", "레포츠", "맛집", "캠핑"};
@@ -208,30 +224,46 @@ public class CrawlerTestMain {
 		
 	//	ArrayList<Object> combineArray = new ArrayList<Object>();
 		
-			for(int a = 0; a < addrs.length; a++) {
-				for(int b = 0; b < ages.length; b++) {
-					for(int c = 0; c < sexs.length; c++) {
-						for(int d = 0; d < purposes.length; d++) {
-							for(int e = 0; e < companions.length; e++) {
-								for(int f = 0; f < seasons.length; f++) {
-									Map<String, String> combine = new HashMap<>();
-									combine.put("seasons", seasons[f]);
-									combine.put("companions", companions[e]);
-									combine.put("purposes", purposes[d]);
-									combine.put("sexs", sexs[c]);
-									combine.put("ages", ages[b]);
-									combine.put("addrs", addrs[a]);
-									combineArray.add(combine);
-									//System.out.println(combineArray);
-								}
+		int randomAddr [] = new int[addrs.length];
+		Random  r = new Random();
+		
+		for(int i=0;i<addrs.length;i++)
+		{
+			randomAddr[i] = r.nextInt(addrs.length)+1;
+			for(int j=0; j<i; j++)
+			{
+				if(randomAddr[i]==randomAddr[j])
+				{
+					i--;
+				}
+			}	
+		}
+		
+		for(int a = 0; a < addrs.length; a++) {
+			
+			for(int b = 0; b < ages.length; b++) {
+				for(int c = 0; c < sexs.length; c++) {
+					for(int d = 0; d < purposes.length; d++) {
+						for(int e = 0; e < companions.length; e++) {
+							for(int f = 0; f < seasons.length; f++) {
+								Map<String, String> combine = new HashMap<>();
+								combine.put("seasons", seasons[f]);
+								combine.put("companions", companions[e]);
+								combine.put("purposes", purposes[d]);
+								combine.put("sexs", sexs[c]);
+								combine.put("ages", ages[b]);
+								combine.put("addrs", addrs[randomAddr[a]]);
+								combineArray.add(combine);
+								//System.out.println(combineArray);
 							}
 						}
 					}
 				}
-		
 			}
-			//System.out.println(combineArray);
-			return combineArray;
+	
+		}
+		//System.out.println(combineArray);
+		return combineArray;
 	}
 			
 	
