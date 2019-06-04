@@ -102,8 +102,8 @@ public class CrawlerTestMain {
 			
 			
 			String htmlList2 = htmlList.replace(",", "");
-			htmlList2 = htmlList2.replace("\"", "");
-			//[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"]
+			htmlList2 = htmlList2.replaceAll("[\\{\\}\\[\\]\\/?.,;:|\\)*~`!^\\-_+<>@\\#$%&\\\\\\=\\(\\'\\\"]", "");
+			//[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"]  ^[ㄱ-ㅎ가-힣]*$ [^ㄱ-ㅎ|ㅏ-ㅣ|가-힣]
 
 			//System.out.println(htmlList2);
 			
@@ -208,14 +208,14 @@ public class CrawlerTestMain {
 	public static ArrayList<Object> searchCombin() {
 		
 		/*String [] addrs = {"서울특별시", "부산광역시"
-				, "경기도", "강원도", "충청도", "전라도", "경상도", "제주도"};
+				, "경기도", "강원도", "충청도", "전라도", "경상도", "제주도"};"강원도", "충청도", "전라도", "경상도", "제주도"
 		String [] ages = {"10대", "20대", "30대+40대", "50대+60대+70대+80대"};
 		String [] sexs = {"남자", "여자"};
 		String [] purposes = {"자연", "휴양", "역사", "문화", "축제", "레포츠", "맛집", "캠핑"};
 		String [] companions = {"부모님", "자녀", "연인", "친구"};
 		String [] seasons = {"봄", "여름", "가을", "겨울"};*/
 		
-		String [] addrs = {"강원도", "충청도", "전라도", "경상도", "제주도"};
+		String [] addrs = {"인천광역시", "대전광역시"};
 		String [] ages = {"10대", "20대", "30대+40대", "50대+60대+70대+80대"};
 		String [] sexs = {"남자", "여자"};
 		String [] purposes = {"자연", "휴양", "역사", "문화", "축제", "레포츠", "맛집", "캠핑"};
