@@ -2,7 +2,6 @@ package crawler;
 
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -15,12 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class CrawlerTestMain {
 	
@@ -63,6 +66,8 @@ public class CrawlerTestMain {
 				nextDoc = Jsoup.connect(s).get();
 			
 			// 상세 내용 추출하기
+				
+				
 			String htmlList = nextDoc.select("div.se-component span").text();
 			if(htmlList.equals("")) {
 				htmlList = nextDoc.select("div.se_component span").text();
@@ -71,8 +76,10 @@ public class CrawlerTestMain {
 				htmlList = nextDoc.select("div. span").text();
 		
 			}*/
+			String htmlList2 = htmlList.replace(",", "");
+			htmlList2 = htmlList2.replaceAll("[\\{\\}\\[\\]\\/?.,;:|\\)*~`!^\\-_+<>@\\#$%&\\\\\\=\\(\\'\\\"]", "");
 			
-			if(!htmlList.equals("")&&htmlList.length()<30000) {
+			if(!htmlList2.equals("")&&htmlList2.length()<30000) {
 			//debug gg	
 			
 			String titleFin	= (String) ((HashMap<String,String>) ss).get("title");
@@ -99,20 +106,70 @@ public class CrawlerTestMain {
 			
 			// 블로그 내용 가져오기 테스트
 			//System.out.println(s);
-			
-			
-			String htmlList2 = htmlList.replace(",", "");
-			htmlList2 = htmlList2.replaceAll("[\\{\\}\\[\\]\\/?.,;:|\\)*~`!^\\-_+<>@\\#$%&\\\\\\=\\(\\'\\\"]", "");
-			//[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"]  ^[ㄱ-ㅎ가-힣]*$ [^ㄱ-ㅎ|ㅏ-ㅣ|가-힣]
-
 			//System.out.println(htmlList2);
+
 			
-			
+			//맵선언
 			Map<String, Object> contextMap = new HashMap<>();
+			
+			ArrayList<HashMap<String, String>> wordArrayList = new ArrayList<HashMap<String, String>>();
+			ArrayList<HashMap<String, String>> wordArrayDu = new ArrayList<HashMap<String, String>>();
+			RestApi http2 = new RestApi();
+			
+			//System.out.println("GET으로 데이터 가져오기"); 
+			
+			//String nerTextResult = "내일 연세 대학교의 교명은 1957년 연희대학교와 세브란스 의과대학의 통합 후에 공식적으로 사용되었다.";
+			String nerText = htmlList;
+			
+			String nerTextResult = null;
+			ArrayList<String> nerTextArray = new ArrayList<String>();
+			
+			if(nerText.length()>1000) {
+				
+				for(int i1 = 0;i1<nerText.length()/1000;i1++){
+					nerTextArray.add(nerText.substring(1000*i1, 1000*(i1+1)));
+				}
+			}else {
+				nerTextArray.add(nerText.substring(0, nerText.length()));
+			}
+			
+			for(String array : nerTextArray) {
+				String words = array;
+				
+				String encodeResult = URLEncoder.encode(words, "UTF-8");
+				String param = encodeResult;
+				ArrayList<HashMap<String, String>> wordArray = http2.sendGetEnt("http://58.123.178.130:4942/nerView/nerResult.do?nerText="+param+"&condition=nerT");
+				//System.out.println(wordArray);
+				wordArrayDu.addAll(wordArray);
+				for(int i1=0; i1<wordArrayDu.size(); i1++) {
+            		if(!wordArrayList.contains(wordArrayDu.get(i1)))
+            			wordArrayList.add(wordArrayDu.get(i1));
+				}//System.out.println(wordArrayList);
+				
+			}
+			
+			ArrayList<String> geoWordList = new ArrayList<String>();
+			ArrayList<String> trpWordList = new ArrayList<String>();
+			
+			
+			for(HashMap arrWd : wordArrayList) {
+				
+				if(arrWd.get("entity").equals("\"GEO\"")) {
+					geoWordList.add((String) arrWd.get("word"));
+				} else if(arrWd.get("entity").equals("\"TRP\"")) {
+					trpWordList.add((String) arrWd.get("word"));
+				}
+				
+			}
+				
 			contextMap.put("url", s);
 			contextMap.put("date", dateTime);
 			contextMap.put("text", htmlList2);
 			contextMap.put("title", titleFin);
+			contextMap.put("wordTrp", trpWordList);
+			contextMap.put("wordGeo", geoWordList);
+			//contextMap.put("wordEntity", wordArrayList);
+			//contextMap.put("nerResult", nerResult);
 			
 			myStringArrays.add(contextMap);
 			
@@ -151,12 +208,15 @@ public class CrawlerTestMain {
     		  
 			   
 			   
-		       BufferedWriter fw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("D:\\workspace\\workspace2\\Crawler\\"+"결과"+".csv",true),"MS949"));
+		       BufferedWriter fw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("D:\\workspace\\workspace2\\Crawler\\"+addrOut+".csv",true),"MS949"));
 		    
 		       for(Object dom : myStringArrays) {	
-	    		   String a = addrOut+","+ageOut+","+sexOut+","+purposeOut+","+companionOut+","+seasonOut
+	    		   String a = addrOut
+//	    				   +","+ageOut+","+sexOut
+	    				   +","+purposeOut+","+companionOut+","+seasonOut
 //	    				   +""+ ","+travelOut
-	    				   +","+((HashMap)dom).get("url")+","+((HashMap)dom).get("title")+","+((HashMap)dom).get("date")+",\""+((HashMap)dom).get("text")+"\"";
+	    				   +","+((HashMap)dom).get("url")+","+((HashMap)dom).get("title")+","+((HashMap)dom).get("date")
+	    				   +","+((HashMap)dom).get("text")+","+((HashMap)dom).get("wordTrp")+","+((HashMap)dom).get("wordGeo");
 	    		   fw.write(a);
 	    		   fw.newLine();
 	    		    
@@ -176,7 +236,7 @@ public class CrawlerTestMain {
 
 	public static void main(String[] args) throws Exception{
 		
-		String value = null;
+			String value = null;
 			int index=0;
 			ArrayList<Object> combineArray = null;
 		
@@ -185,7 +245,8 @@ public class CrawlerTestMain {
 			
 			for(Object arr2 : combineArray) {	
 				index = combineArray.indexOf(arr2);
-		 		value = ((HashMap)arr2).get("addrs")+"+"+((HashMap)arr2).get("ages")+"+"+((HashMap)arr2).get("sexs")
+		 		value = ((HashMap)arr2).get("addrs")
+		 				//+"+"+((HashMap)arr2).get("ages")+"+"+((HashMap)arr2).get("sexs")
 		 				   +"+"+((HashMap)arr2).get("purposes")+"+"+((HashMap)arr2).get("companions")+"+"+((HashMap)arr2).get("seasons");
 		 		  
 			
@@ -198,7 +259,7 @@ public class CrawlerTestMain {
 	//		int totalNum = Integer.parseInt(c.blogTotal(url));
 			System.out.println(index);
 	//			for(int i = 0; i <totalNum/1000; i++) {
-				for(int i = 0; i <4; i++) {	
+				for(int i = 10; i <14; i++) {	
 					getSearch(sc,i*10+1,index);
 				
 				}
@@ -215,15 +276,15 @@ public class CrawlerTestMain {
 		String [] companions = {"부모님", "자녀", "연인", "친구"};
 		String [] seasons = {"봄", "여름", "가을", "겨울"};*/
 		
-		String [] addrs = {"인천광역시", "대전광역시"};
-		String [] ages = {"10대", "20대", "30대+40대", "50대+60대+70대+80대"};
-		String [] sexs = {"남자", "여자"};
-		String [] purposes = {"자연", "휴양", "역사", "문화", "축제", "레포츠", "맛집", "캠핑"};
-		String [] companions = {"부모님", "자녀", "연인", "친구"};
+		String [] addrs = {"서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별시", "경기도", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "제주도"};
+		//String [] ages = {"10대", "20대", "30대+40대", "50대+60대+70대+80대"};
+		//String [] sexs = {"남자", "여자"};
+		String [] purposes = {"자연", "휴양", "역사", "문화", "축제", "레포츠", "맛집", "체험", "캠핑"};
+		String [] companions = {"부모님", "자녀", "연인", "친구", "동료"};
 		String [] seasons = {"봄", "여름", "가을", "겨울"};
 		
 	//	ArrayList<Object> combineArray = new ArrayList<Object>();
-		
+		//순서랜덤으로
 		int randomAddr [] = new int[addrs.length];
 		Random  r = new Random();
 		
@@ -241,8 +302,8 @@ public class CrawlerTestMain {
 		
 		for(int a = 0; a < addrs.length; a++) {
 			
-			for(int b = 0; b < ages.length; b++) {
-				for(int c = 0; c < sexs.length; c++) {
+			//for(int b = 0; b < ages.length; b++) {
+			//	for(int c = 0; c < sexs.length; c++) {
 					for(int d = 0; d < purposes.length; d++) {
 						for(int e = 0; e < companions.length; e++) {
 							for(int f = 0; f < seasons.length; f++) {
@@ -250,18 +311,20 @@ public class CrawlerTestMain {
 								combine.put("seasons", seasons[f]);
 								combine.put("companions", companions[e]);
 								combine.put("purposes", purposes[d]);
-								combine.put("sexs", sexs[c]);
-								combine.put("ages", ages[b]);
-								combine.put("addrs", addrs[randomAddr[a]]);
+						//		combine.put("sexs", sexs[c]);
+						//		combine.put("ages", ages[b]);
+								combine.put("addrs", addrs[a]);
+						//		combine.put("addrs", addrs[randomAddr[a]]);
+								
 								combineArray.add(combine);
 								//System.out.println(combineArray);
 							}
 						}
 					}
 				}
-			}
+			//}
 	
-		}
+		//}
 		//System.out.println(combineArray);
 		return combineArray;
 	}
